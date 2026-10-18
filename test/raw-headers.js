@@ -118,6 +118,22 @@ describe('rawHeaders', () => {
     expect(req.headers['x-forwarded-for']).to.equal('1.1.1.1, 2.2.2.2');
   });
 
+  it('should list a header whose name is also an Object.prototype property', async () => {
+    const req = await captureRequest({
+      version: '2.0',
+      rawPath: '/',
+      rawQueryString: '',
+      headers: { 'constructor': 'x', 'accept': '*/*' },
+      requestContext: { http: { method: 'GET', path: '/' } },
+    }, { requestId: false });
+
+    expect(pairs(req.rawHeaders)).to.eql([
+      ['constructor', 'x'],
+      ['accept', '*/*'],
+      ['content-length', '0'],
+    ]);
+  });
+
   it('should agree with req.headers', async () => {
     const events = {
       'api gateway v1': {
